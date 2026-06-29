@@ -76,8 +76,10 @@ app.post('/api/generate', async (req, res) => {
     creditPack(uid, null, spend.usedFree ? 0 : 1);
     console.error('generate failed:', err?.status, err?.name, err?.message || err);
     const body = { error: 'generation_failed', message: 'The AI call failed — your credit was not used. Please retry.' };
-    // TEMP diagnostics (no secrets — upstream error type/message only). Remove after fix.
-    body.detail = { status: err?.status, name: err?.name, type: err?.type, message: String(err?.message || err).slice(0, 300) };
+    // Optional diagnostics (no secrets): set LISTLIFT_DEBUG=1 to surface the upstream error cause.
+    if (process.env.LISTLIFT_DEBUG === '1') {
+      body.detail = { status: err?.status, name: err?.name, type: err?.type, message: String(err?.message || err).slice(0, 300) };
+    }
     res.status(502).json(body);
   }
 });
