@@ -1,0 +1,23 @@
+# One-click deploy config for Render (free web service tier).
+# Set the secret env vars (ANTHROPIC_API_KEY, STRIPE_SECRET_KEY=sk_test_...,
+# STRIPE_PUBLISHABLE_KEY, PUBLIC_BASE_URL) in the Render dashboard, not here.
+services:
+  - type: web
+    name: listlift
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LISTLIFT_MODEL
+        value: claude-sonnet-4-6
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false

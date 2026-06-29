@@ -1,0 +1,21 @@
+{
+  "name": "listlift",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ListLift — AI Etsy listing optimizer. Rough product info in, keyword-rich Etsy-tuned listing out.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "smoke": "node scripts/smoke.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.40.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "stripe": "^16.12.0"
+  }
+}

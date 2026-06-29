@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ListLift — AI Etsy Listing Optimizer</title>
+  <meta name="description" content="Turn rough product notes into a keyword-rich, Etsy-tuned listing in seconds: SEO title, 13 tags, description, and CSV export." />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="site">
+    <div class="wrap row">
+      <div class="brand">📈 ListLift</div>
+      <div class="muted small" id="mode-badge"></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Etsy listings that actually rank — in 15 seconds.</h1>
+      <p class="lede">Paste a few rough notes about your product. Get back a keyword-front-loaded SEO title,
+        all <strong>13 tags</strong>, a benefit-led description, and a CSV you can paste straight into Etsy.</p>
+      <p class="trust small muted">First listing is <strong>free</strong>. No account needed.</p>
+    </section>
+
+    <section class="card" id="form-card">
+      <form id="gen-form">
+        <div class="grid">
+          <label class="full">Product name / idea
+            <input name="productName" placeholder="e.g. Hand-poured soy candle, lavender" required />
+          </label>
+          <label>Category
+            <input name="category" placeholder="e.g. candles, jewelry, wall art" />
+          </label>
+          <label>Target buyer (optional)
+            <input name="audience" placeholder="e.g. cozy home lovers, gift shoppers" />
+          </label>
+          <label class="full">Details / specs
+            <textarea name="details" rows="3" placeholder="Materials, size, what makes it special, who it's for…"></textarea>
+          </label>
+          <label class="full">Seed keywords (optional, comma-separated)
+            <input name="keywords" placeholder="lavender candle, soy candle, gift for her" />
+          </label>
+        </div>
+        <button type="submit" class="btn primary" id="gen-btn">✨ Generate my Etsy listing</button>
+        <p class="small muted" id="balance-line"></p>
+      </form>
+    </section>
+
+    <section id="result" class="card hidden">
+      <div class="row between">
+        <h2>Your optimized listing</h2>
+        <span class="badge" id="result-mode"></span>
+      </div>
+
+      <div class="field">
+        <div class="row between"><label>SEO Title <span class="muted small" id="title-count"></span></label><button class="copy" data-copy="out-title">Copy</button></div>
+        <div class="out" id="out-title"></div>
+      </div>
+
+      <div class="field">
+        <div class="row between"><label>13 Tags</label><button class="copy" data-copy="out-tags">Copy all</button></div>
+        <div class="tags" id="out-tags-chips"></div>
+        <div class="out hidden" id="out-tags"></div>
+      </div>
+
+      <div class="field">
+        <div class="row between"><label>Description</label><button class="copy" data-copy="out-desc">Copy</button></div>
+        <div class="out pre" id="out-desc"></div>
+      </div>
+
+      <div class="field two">
+        <div>
+          <div class="row between"><label>Materials</label><button class="copy" data-copy="out-materials">Copy</button></div>
+          <div class="out" id="out-materials"></div>
+        </div>
+        <div>
+          <div class="row between"><label>Photo alt text</label><button class="copy" data-copy="out-alt">Copy</button></div>
+          <div class="out" id="out-alt"></div>
+        </div>
+      </div>
+
+      <div class="row gap">
+        <button class="btn" id="another-btn">Generate another</button>
+        <button class="btn" id="csv-btn">⬇ Export CSV</button>
+      </div>
+    </section>
+
+    <!-- Paywall -->
+    <section id="paywall" class="card paywall hidden">
+      <h2>You've used your free listing 🎉</h2>
+      <p>Unlock the <strong>10-Listing Pack</strong> and keep optimizing — title, 13 tags, description, materials, alt text, and CSV export for every one.</p>
+      <div class="price"><span class="amount" id="price-amount">$39</span> <span class="muted">one-time · <span id="price-credits">10</span> listings</span></div>
+      <button class="btn primary big" id="buy-btn">Unlock 10 listings → checkout</button>
+      <p class="small muted" id="paywall-note"></p>
+    </section>
+  </main>
+
+  <footer class="wrap muted small">
+    <p>ListLift · AI-assisted Etsy listings. Review output before publishing — you're responsible for accuracy and Etsy policy compliance.</p>
+  </footer>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
