@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "smoke": "node scripts/smoke.js"
+    "smoke": "node scripts/smoke.js",
+    "test:store": "node scripts/store.test.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.40.0",

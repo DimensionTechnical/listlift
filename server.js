@@ -6,9 +6,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { generateListing, usingRealClaude } from './lib/claude.js';
-import { createCheckout, verifySession, usingRealStripe, assertTestMode, PACK_PRICE_CENTS } from './lib/payments.js';
+import { createCheckout, verifySession, usingRealStripe, assertTestMode, PACK_PRICE_CENTS, listPaidSessionsForUid } from './lib/payments.js';
 import { listingsToCsv } from './lib/listings.js';
-import { getBalance, consumeCredit, creditPack, logEvent, funnelSummary, CONFIG } from './lib/store.js';
+import { getBalance, consumeCredit, creditPack, refundCredit, logEvent, funnelSummary, CONFIG } from './lib/store.js';
 
 assertTestMode(); // refuse to boot against live Stripe keys
 
@@ -22,6 +22,29 @@ app.use(express.static(join(__dirname, 'public')));
 // an anonymous handle. Good enough for an MVP credit wallet; not a security boundary.
 function uidFrom(req) {
   return (req.body && req.body.uid) || req.query.uid || req.get('x-listlift-uid') || null;
+}
+
+// Stripe-as-source-of-truth recovery. When the local wallet shows no usable
+// credits (e.g. after Render wiped the disk on redeploy/cold-start), re-credit
+// any paid Checkout Sessions for this uid. Idempotent within a store lifetime
+// via creditPack's per-session fulfilled map; after a wipe it re-grants the
+// pack, erring toward the customer (per DIM-5). No-op in mock mode.
+async function reconcilePaidCredits(uid) {
+  if (!usingRealStripe() || !uid) return false;
+  let credited = false;
+  try {
+    const sessionIds = await listPaidSessionsForUid(uid);
+    for (const sessionId of sessionIds) {
+      const r = creditPack(uid, sessionId);
+      if (!r.alreadyFulfilled) {
+        logEvent('paid', uid, { sessionId, via: 'reconcile' });
+        credited = true;
+      }
+    }
+  } catch (err) {
+    console.error('reconcile failed:', err?.message || err);
+  }
+  return credited;
 }
 
 app.get('/api/config', (req, res) => {
@@ -55,7 +78,13 @@ app.post('/api/generate', async (req, res) => {
     return res.status(400).json({ error: 'Tell us at least a product name or some details.' });
   }
 
-  const before = getBalance(uid);
+  let before = getBalance(uid);
+  if (!before.canGenerate) {
+    // Local wallet may have been wiped (Render free-tier ephemeral disk).
+    // Recompute paid entitlement from Stripe before paywalling a real buyer.
+    const recovered = await reconcilePaidCredits(uid);
+    if (recovered) before = getBalance(uid);
+  }
   if (!before.canGenerate) {
     logEvent('paywall', uid);
     return res.status(402).json({ error: 'paywall', balance: before, message: 'Free listing used — unlock the 10-pack to keep going.' });
@@ -73,7 +102,8 @@ app.post('/api/generate', async (req, res) => {
     res.json({ listing, mode, model, balance: spend.balance });
   } catch (err) {
     // refund the credit on failure so a flaky API call doesn't cost the user
-    creditPack(uid, null, spend.usedFree ? 0 : 1);
+    // (restores freeUsed for free generations, paidCredits for paid ones)
+    refundCredit(uid, { usedFree: spend.usedFree });
     console.error('generate failed:', err?.status, err?.name, err?.message || err);
     const body = { error: 'generation_failed', message: 'The AI call failed — your credit was not used. Please retry.' };
     // Optional diagnostics (no secrets): set LISTLIFT_DEBUG=1 to surface the upstream error cause.
