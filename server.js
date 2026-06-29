@@ -74,8 +74,11 @@ app.post('/api/generate', async (req, res) => {
   } catch (err) {
     // refund the credit on failure so a flaky API call doesn't cost the user
     creditPack(uid, null, spend.usedFree ? 0 : 1);
-    console.error('generate failed:', err?.message || err);
-    res.status(502).json({ error: 'generation_failed', message: 'The AI call failed — your credit was not used. Please retry.' });
+    console.error('generate failed:', err?.status, err?.name, err?.message || err);
+    const body = { error: 'generation_failed', message: 'The AI call failed — your credit was not used. Please retry.' };
+    // TEMP diagnostics (no secrets — upstream error type/message only). Remove after fix.
+    body.detail = { status: err?.status, name: err?.name, type: err?.type, message: String(err?.message || err).slice(0, 300) };
+    res.status(502).json(body);
   }
 });
 
