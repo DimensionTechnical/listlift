@@ -22,7 +22,7 @@ funnel is demoable/testable offline. To go live, set env vars (see `.env.example
 | Var | Purpose |
 |---|---|
 | `ANTHROPIC_API_KEY` | Real Claude listing generation |
-| `LISTLIFT_MODEL` | Model id (default `claude-sonnet-4-6`) |
+| `LISTLIFT_MODEL` | Model id (default `claude-haiku-4-5-20251001`, CEO choice for cost; set to `claude-sonnet-4-6` for higher quality) |
 | `STRIPE_SECRET_KEY` | **`sk_test_...` only** — app refuses to boot on live keys |
 | `STRIPE_PUBLISHABLE_KEY` | Stripe publishable test key |
 | `PUBLIC_BASE_URL` | Deployment URL (for Stripe success/cancel redirects) |
