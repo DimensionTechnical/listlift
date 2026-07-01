@@ -17,6 +17,12 @@ const app = express();
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(join(__dirname, 'public')));
 
+// Tolerate a stray trailing slash on root static files (e.g. a tool pasting
+// /sitemap.xml/ or /robots.txt/). If a "filename.ext/" path falls through the
+// static handler, 301 to the slash-less canonical so it serves. Never matches
+// /api/* routes (those have no filename.ext/ shape).
+app.get(/^\/([^/]+\.[a-z0-9]+)\/$/i, (req, res) => res.redirect(301, '/' + req.params[0]));
+
 // --- lightweight per-browser identity via cookie-less uid in header/body ---
 // The frontend generates a uid (localStorage) and sends it; server trusts it as
 // an anonymous handle. Good enough for an MVP credit wallet; not a security boundary.
